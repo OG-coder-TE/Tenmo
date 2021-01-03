@@ -1,7 +1,10 @@
 package com.techelevator.tenmo;
 
+
+import org.springframework.web.client.RestTemplate;
 import com.techelevator.tenmo.models.AuthenticatedUser;
 import com.techelevator.tenmo.models.UserCredentials;
+import com.techelevator.tenmo.services.AccountService;
 import com.techelevator.tenmo.services.AuthenticationService;
 import com.techelevator.tenmo.services.AuthenticationServiceException;
 import com.techelevator.view.ConsoleService;
@@ -25,15 +28,18 @@ private static final String API_BASE_URL = "http://localhost:8080/";
     private AuthenticatedUser currentUser;
     private ConsoleService console;
     private AuthenticationService authenticationService;
+    private AccountService accountService;
+    private RestTemplate restTemplate = new RestTemplate();
 
     public static void main(String[] args) {
-    	App app = new App(new ConsoleService(System.in, System.out), new AuthenticationService(API_BASE_URL));
+    	App app = new App(new ConsoleService(System.in, System.out), new AuthenticationService(API_BASE_URL), new AccountService(API_BASE_URL));
     	app.run();
     }
 
-    public App(ConsoleService console, AuthenticationService authenticationService) {
+    public App(ConsoleService console, AuthenticationService authenticationService, AccountService accountService) {
 		this.console = console;
 		this.authenticationService = authenticationService;
+		this.accountService = accountService;
 	}
 
 	public void run() {
@@ -60,6 +66,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 				requestBucks();
 			} else if(MAIN_MENU_OPTION_LOGIN.equals(choice)) {
 				login();
+				accountService.setCurrentUser(currentUser);
 			} else {
 				// the only other option on the main menu is to exit
 				exitProgram();
@@ -68,27 +75,27 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 	}
 
 	private void viewCurrentBalance() {
-		// TODO Auto-generated method stub
-		
+		System.out.println("Your current account balance is: $" + accountService.viewCurrentBalance());
+
 	}
 
 	private void viewTransferHistory() {
-		// TODO Auto-generated method stub
+	accountService.viewTransferHistory();
 		
 	}
 
 	private void viewPendingRequests() {
-		// TODO Auto-generated method stub
+	accountService.viewPendingRequests();
 		
 	}
 
 	private void sendBucks() {
-		// TODO Auto-generated method stub
+		accountService.sendBucks();
 		
 	}
 
 	private void requestBucks() {
-		// TODO Auto-generated method stub
+		accountService.requestBucks();
 		
 	}
 	
@@ -101,6 +108,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			String choice = (String)console.getChoiceFromOptions(LOGIN_MENU_OPTIONS);
 			if (LOGIN_MENU_OPTION_LOGIN.equals(choice)) {
 				login();
+				accountService.setCurrentUser(currentUser);
 			} else if (LOGIN_MENU_OPTION_REGISTER.equals(choice)) {
 				register();
 			} else {
@@ -151,4 +159,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 		String password = console.getUserInput("Password");
 		return new UserCredentials(username, password);
 	}
+
+
 }
+
